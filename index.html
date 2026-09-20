@@ -1,0 +1,1331 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>آخر مترو — الفصل الأول: النزول</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Aref+Ruqaa:wght@400;700&family=Rubik:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#d9d3c4; --dim:#7d7768; --amber:#c9992e; --red:#a13a2c;
+  --line:rgba(217,211,196,.16); --bg:#050505;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--ink);font-family:'Rubik',sans-serif;user-select:none;-webkit-user-select:none}
+#gl{position:fixed;inset:0;display:block}
+.hidden{display:none!important}
+kbd{border:1px solid var(--line);padding:1px 8px;font-family:inherit;font-size:12px;color:var(--amber);border-radius:2px;background:rgba(255,255,255,.02)}
+
+#vignette{position:fixed;inset:0;pointer-events:none;z-index:3;background:radial-gradient(ellipse at center,transparent 55%,rgba(0,0,0,.5) 100%)}
+#grain{position:fixed;inset:-140px;pointer-events:none;z-index:4;opacity:.06;background-repeat:repeat}
+#fade{position:fixed;inset:0;background:#000;opacity:1;pointer-events:none;z-index:40;transition:opacity 1s}
+
+#hud{position:fixed;top:0;left:0;right:0;z-index:10;display:flex;justify-content:space-between;align-items:center;padding:14px 22px;pointer-events:none;font-size:13px}
+.hud-g{display:flex;gap:16px;align-items:center;color:var(--dim);letter-spacing:.5px}
+#clock{color:var(--ink);font-weight:500;font-variant-numeric:tabular-nums}
+#batt{display:flex;align-items:center;gap:6px}
+#battBar{width:26px;height:11px;border:1px solid var(--dim);position:relative;border-radius:2px}
+#battBar::after{content:'';position:absolute;right:-4px;top:3px;width:2px;height:5px;background:var(--dim)}
+#battFill{position:absolute;top:1px;right:1px;bottom:1px;background:var(--ink)}
+#nextStation{color:var(--amber);opacity:0;transition:opacity .5s;letter-spacing:1px}
+#nextStation.on{opacity:1;animation:blinkTxt 1.6s infinite}
+@keyframes blinkTxt{0%,100%{opacity:1}50%{opacity:.45}}
+#objective{position:fixed;top:52px;right:22px;z-index:10;color:var(--dim);font-size:12.5px;letter-spacing:.5px;pointer-events:none;border-right:2px solid var(--amber);padding-right:10px;max-width:300px}
+#prompt{position:fixed;left:50%;top:60%;transform:translateX(-50%);z-index:10;border:1px solid var(--line);background:rgba(5,5,5,.75);padding:8px 18px;font-size:14px;pointer-events:none;white-space:nowrap}
+#crosshair{position:fixed;left:50%;top:50%;width:3px;height:3px;background:rgba(217,211,196,.65);border-radius:50%;transform:translate(-50%,-50%);z-index:9;pointer-events:none}
+#subtitle{position:fixed;bottom:100px;left:50%;transform:translateX(-50%);max-width:660px;text-align:center;z-index:45;text-shadow:0 1px 6px #000,0 0 2px #000;padding:0 20px}
+#subWho{color:var(--amber);font-size:12px;letter-spacing:3px;margin-bottom:5px}
+#subTxt{font-size:17.5px;line-height:1.6}
+#toast{position:fixed;top:64px;left:50%;transform:translateX(-50%);z-index:15;background:rgba(8,8,7,.9);border:1px solid var(--line);border-right:2px solid var(--amber);padding:10px 18px;font-size:13.5px;transition:opacity .4s;opacity:0;pointer-events:none;white-space:nowrap;max-width:92vw;overflow:hidden;text-overflow:ellipsis}
+
+#dialog{position:fixed;bottom:28px;left:50%;transform:translateX(-50%);width:min(690px,92vw);z-index:20;background:rgba(8,8,6,.93);border:1px solid var(--line);padding:18px 22px 30px}
+#dlgWho{color:var(--amber);font-size:12px;letter-spacing:3px;margin-bottom:8px}
+#dlgTxt{font-size:17px;line-height:1.75;min-height:58px}
+#dlgChoices{display:flex;flex-direction:column;gap:8px;margin-top:14px}
+#dlgChoices button{text-align:right;background:none;border:1px solid var(--line);color:var(--ink);padding:9px 14px;font-family:inherit;font-size:14.5px;cursor:pointer;transition:.15s}
+#dlgChoices button:hover{border-color:var(--amber);color:#fff}
+#dlgChoices .num{color:var(--amber);margin-left:10px}
+#dlgHint{position:absolute;left:20px;bottom:9px;color:var(--dim);font-size:11px}
+
+#phone{position:fixed;top:50%;left:24px;transform:translateY(-50%) translateX(-130%);transition:transform .45s cubic-bezier(.2,.9,.25,1);width:252px;z-index:25;background:#0a0a0b;border:1px solid #232323;border-radius:20px;padding:12px 12px 10px;box-shadow:0 24px 70px rgba(0,0,0,.85)}
+#phone.open{transform:translateY(-50%) translateX(0)}
+.ph-status{display:flex;justify-content:space-between;align-items:center;font-size:11px;color:var(--dim);padding:2px 6px 10px}
+.ph-time{color:var(--ink);font-weight:500}
+.ph-sig{letter-spacing:1px}
+.ph-tabs{display:flex;border-top:1px solid #1c1c1c;border-bottom:1px solid #1c1c1c;margin-bottom:10px}
+.ph-tabs button{flex:1;background:none;border:none;color:var(--dim);padding:10px 0;cursor:pointer;display:flex;justify-content:center}
+.ph-tabs button.on{color:var(--amber)}
+.ph-tabs svg{width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:1.6}
+.ph-screen{min-height:230px;font-size:13px}
+.ph-big{display:flex;flex-direction:column;align-items:center;gap:14px;padding-top:26px}
+#torchBtn{width:74px;height:74px;border-radius:50%;border:1px solid var(--line);background:none;color:var(--ink);cursor:pointer;font-family:inherit;font-size:12px;letter-spacing:1px;transition:.2s}
+#torchBtn.on{border-color:var(--amber);color:var(--amber);box-shadow:0 0 0 4px rgba(201,153,46,.08) inset}
+.ph-note{color:var(--dim);font-size:11.5px;text-align:center;line-height:1.8}
+.msg{border:1px solid #1d1d1d;padding:9px 11px;margin-bottom:8px}
+.msg .from{font-size:11px;color:var(--amber);margin-bottom:4px}
+.msg .body{font-size:13px;line-height:1.6}
+.note-row{display:flex;gap:8px;padding:7px 4px;border-bottom:1px solid #171717;font-size:12.5px;line-height:1.6;color:#b6b0a1}
+.note-row::before{content:'●';color:var(--amber);font-size:8px;margin-top:6px}
+#mapWrap{display:flex;justify-content:center;padding-top:8px}
+#phoneX{position:absolute;top:-11px;right:-11px;width:26px;height:26px;border-radius:50%;border:1px solid var(--line);background:#0a0a0b;color:var(--dim);cursor:pointer;font-size:14px;line-height:1}
+#phoneGlow{position:fixed;inset:0;z-index:22;background:#39404a;opacity:0;pointer-events:none;transition:opacity .25s}
+
+#callUI{position:fixed;left:50%;top:42%;transform:translate(-50%,-50%);z-index:36;text-align:center;cursor:pointer}
+#callUI .box{border:1px solid var(--line);background:rgba(6,6,6,.9);padding:26px 44px}
+#callUI .t1{color:var(--amber);letter-spacing:3px;font-size:12px;margin-bottom:10px}
+#callUI .t2{font-size:20px;margin-bottom:18px}
+#callUI .t3{color:var(--dim);font-size:13px}
+
+.screen{position:fixed;inset:0;z-index:50;background:#050505;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px}
+#title .over{color:var(--dim);letter-spacing:6px;font-size:12px;margin-bottom:26px}
+#title .rule{width:44px;height:1px;background:var(--line);margin:0 auto 26px}
+#title h1{font-family:'Aref Ruqaa',serif;font-weight:700;font-size:clamp(64px,13vw,148px);line-height:1.1;color:#e4ddca;animation:flick 7.3s infinite}
+@keyframes flick{0%,90%,100%{opacity:1}91%{opacity:.5}92%{opacity:1}95%{opacity:.72}95.6%{opacity:1}}
+#title .sub{color:var(--dim);margin-top:14px;font-size:14.5px;letter-spacing:1px}
+#title .meta{color:#5c574c;margin-top:8px;font-size:12.5px;letter-spacing:1px}
+#startBtn{margin-top:42px;background:none;border:1px solid var(--line);color:var(--ink);font-family:inherit;font-size:16px;padding:14px 52px;cursor:pointer;letter-spacing:2px;transition:.2s}
+#startBtn:not(:disabled):hover{border-color:var(--amber);color:#fff}
+#startBtn:disabled{opacity:.35;cursor:default}
+#title .keys{display:flex;gap:20px;flex-wrap:wrap;justify-content:center;margin-top:38px;color:var(--dim);font-size:12px}
+#title .keys span{display:flex;gap:7px;align-items:center}
+#title .phones{color:#5c574c;font-size:12px;margin-top:26px}
+#intro{background:#020202;cursor:pointer}
+#introText{font-size:clamp(19px,2.6vw,26px);font-weight:300;line-height:2;max-width:700px;color:#cfc9ba;min-height:120px}
+#introHint{position:absolute;bottom:44px;color:#4c473e;font-size:12px;letter-spacing:2px}
+#end .chapter{color:var(--dim);letter-spacing:5px;font-size:12px;margin-bottom:20px}
+#end h2{font-family:'Aref Ruqaa',serif;font-size:clamp(40px,7vw,72px);color:#e4ddca}
+#end .rule{width:44px;height:1px;background:var(--line);margin:28px auto}
+#stats{display:grid;grid-template-columns:auto auto;gap:10px 34px;font-size:14.5px;text-align:right}
+#stats .k{color:var(--dim)}
+#stats .v{color:var(--ink)}
+#end .quote{margin-top:30px;color:var(--amber);font-size:14.5px;max-width:520px;line-height:1.9}
+#end .tease{margin-top:26px;color:#5c574c;font-size:12.5px;letter-spacing:2px}
+#againBtn{margin-top:34px;background:none;border:1px solid var(--line);color:var(--ink);font-family:inherit;font-size:15px;padding:12px 44px;cursor:pointer;letter-spacing:2px}
+#againBtn:hover{border-color:var(--amber)}
+#clickCatch{position:fixed;inset:0;z-index:35;display:flex;align-items:center;justify-content:center;color:var(--dim);font-size:14px;letter-spacing:2px;background:rgba(0,0,0,.55);cursor:pointer}
+</style>
+</head>
+<body>
+<canvas id="gl"></canvas>
+<div id="vignette"></div>
+<div id="grain"></div>
+
+<div id="hud" class="hidden">
+  <div class="hud-g"><span id="clock">١٢:٤٧ ص</span>
+    <span id="batt"><span id="battBar"><span id="battFill"></span></span><span id="battPct">٧٨٪</span></span>
+  </div>
+  <div class="hud-g"><span id="lineLabel">الخط الأول — اتجاه المرج</span><span id="nextStation"></span></div>
+</div>
+<div id="objective" class="hidden"></div>
+<div id="crosshair" class="hidden"></div>
+<div id="prompt" class="hidden"></div>
+<div id="subtitle" class="hidden"><div id="subWho"></div><div id="subTxt"></div></div>
+<div id="toast"></div>
+<div id="phoneGlow"></div>
+
+<div id="dialog" class="hidden">
+  <div id="dlgWho"></div>
+  <div id="dlgTxt"></div>
+  <div id="dlgChoices"></div>
+  <div id="dlgHint">مسطرة المسافة / نقرة — تكملة</div>
+</div>
+
+<div id="phone">
+  <button id="phoneX">✕</button>
+  <div class="ph-status"><span class="ph-time" id="phTime">١٢:٤٧</span><span class="ph-sig" id="phSig">شبكة ▮▮▮</span><span id="phBatt">٧٨٪</span></div>
+  <div class="ph-tabs">
+    <button data-t="torch" class="on" title="الكشاف"><svg viewBox="0 0 24 24"><path d="M6 3h12l-3 6v10a2 2 0 0 1-2 2h-2a2 2 0 0 1-2-2V9L6 3z"/></svg></button>
+    <button data-t="map" title="الخريطة"><svg viewBox="0 0 24 24"><path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"/><path d="M9 4v14M15 6v14"/></svg></button>
+    <button data-t="msgs" title="الرسائل"><svg viewBox="0 0 24 24"><path d="M21 4H3v14h5l4 4 4-4h5V4z"/></svg></button>
+    <button data-t="notes" title="الملاحظات"><svg viewBox="0 0 24 24"><path d="M6 3h9l4 4v14H6V3z"/><path d="M9 11h7M9 15h7"/></svg></button>
+  </div>
+  <div class="ph-screen">
+    <div class="ph-big" id="scrTorch">
+      <button id="torchBtn">كشّاف</button>
+      <div class="ph-note">البطارية بتخلص… والضوء مش دايمًا<br>هدية سمح.</div>
+    </div>
+    <div id="scrMap" class="hidden"><div id="mapWrap"></div><div class="ph-note" id="mapNote">الخط الأول — المرج ⇄ حلوان</div></div>
+    <div id="scrMsgs" class="hidden"></div>
+    <div id="scrNotes" class="hidden"></div>
+  </div>
+</div>
+
+<div id="callUI" class="hidden">
+  <div class="box">
+    <div class="t1">مكالمة واردة</div>
+    <div class="t2">رقم مجهول</div>
+    <div class="t3"><kbd>R</kbd> — ردّي (أو اضغطي هنا)</div>
+  </div>
+</div>
+
+<div id="title" class="screen">
+  <div class="over">مترو أنفاق القاهرة — الخط الأول</div>
+  <div class="rule"></div>
+  <h1>آخر مترو</h1>
+  <div class="sub">تجربة رعب نفسي — الفصل الأول: «النزول»</div>
+  <div class="meta">١٢:٤٧ ص &nbsp;•&nbsp; محطة العتبة &nbsp;•&nbsp; آخر قطار اتجاه المرج</div>
+  <button id="startBtn" disabled>… جارٍ تجهيز المحطة</button>
+  <div class="keys">
+    <span><kbd>W A S D</kbd> حركة</span><span>الماوس — نظر</span><span><kbd>E</kbd> تفاعل</span>
+    <span><kbd>M</kbd> موبايل</span><span><kbd>T</kbd> كشاف</span><span><kbd>Shift</kbd> جري</span>
+  </div>
+  <div class="phones">اللعب بالسماعات — افتحي الملف في Chrome أو Edge على الكمبيوتر</div>
+</div>
+
+<div id="intro" class="screen hidden">
+  <div id="introText"></div>
+  <div id="introHint">اضغطي في أي مكان للتخطي</div>
+</div>
+
+<div id="end" class="screen hidden">
+  <div class="chapter">الفصل الأول: النزول</div>
+  <h2>انتهى</h2>
+  <div class="rule"></div>
+  <div id="stats"></div>
+  <div class="quote">«متطلعيش من المترو لما توصلي محطة ١٧.»<br>— آخر رسالة وصلت الموبايل</div>
+  <div class="tease">المحطة القادمة: ١٧</div>
+  <button id="againBtn">عيدي الرحلة</button>
+</div>
+
+<div id="fade"></div>
+<div id="clickCatch" class="hidden">اضغطي</div>
+
+<script type="importmap">
+{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"}}
+</script>
+<script type="module">
+import * as THREE from 'three';
+
+/* ============================================================
+   أدوات عامة
+============================================================ */
+const $=id=>document.getElementById(id);
+const wait=ms=>new Promise(r=>setTimeout(r,ms));
+const until=fn=>new Promise(r=>{const c=()=>fn()?r():setTimeout(c,120);c();});
+const ar=n=>String(n).replace(/\d/g,d=>'٠١٢٣٤٥٦٧٨٩'[d]);
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const smooth=t=>t*t*(3-2*t);
+const show=id=>$(id).classList.remove('hidden');
+const hide=id=>$(id).classList.add('hidden');
+function tween(obj,key,to,dur,ease=t=>t*(2-t)){
+  return new Promise(res=>{
+    const from=obj[key],t0=performance.now();
+    const step=n=>{const t=Math.min(1,(n-t0)/dur);obj[key]=from+(to-from)*ease(t);t<1?requestAnimationFrame(step):res();};
+    requestAnimationFrame(step);
+  });
+}
+
+/* ============================================================
+   محرك الصوت — كل الأصوات مولّدة بالكود
+============================================================ */
+const S={ctx:null,on:false,
+  init(){ if(this.ctx)return; const C=window.AudioContext||window.webkitAudioContext; this.ctx=new C();
+    this.out=this.ctx.createGain(); this.out.gain.value=.85; this.out.connect(this.ctx.destination);
+    const len=this.ctx.sampleRate*2;
+    this.white=this.ctx.createBuffer(1,len,this.ctx.sampleRate);
+    const d=this.white.getChannelData(0); for(let i=0;i<len;i++)d[i]=Math.random()*2-1;
+    this.brown=this.ctx.createBuffer(1,len,this.ctx.sampleRate);
+    const b=this.brown.getChannelData(0); let l=0; for(let i=0;i<len;i++){l=(l+.02*(Math.random()*2-1))/1.02;b[i]=l*3.5;}
+    this.on=true; this._persist();
+  },
+  _persist(){ const c=this.ctx;
+    const mk=(buf,f)=>{const s=c.createBufferSource();s.buffer=buf;s.loop=true;
+      const fl=c.createBiquadFilter();fl.frequency.value=f;
+      const gn=c.createGain();gn.gain.value=0;s.connect(fl).connect(gn).connect(this.out);s.start();return gn;};
+    this.ambG=mk(this.brown,320); this.rumG=mk(this.brown,120);
+    const hum=c.createOscillator();hum.type='sine';hum.frequency.value=100;
+    const hg=c.createGain();hg.gain.value=0;hum.connect(hg).connect(this.out);hum.start();this.humG=hg;
+    const dr=c.createOscillator();dr.type='sine';dr.frequency.value=38.5;
+    const dr2=c.createOscillator();dr2.type='sine';dr2.frequency.value=39.2;
+    const dg=c.createGain();dg.gain.value=0;dr.connect(dg);dr2.connect(dg);dg.connect(this.out);dr.start();dr2.start();this.droneG=dg;
+  },
+  setAmb(v){if(this.on)this.ambG.gain.linearRampToValueAtTime(v,this.ctx.currentTime+1.5);},
+  setHum(v){if(this.on)this.humG.gain.linearRampToValueAtTime(v,this.ctx.currentTime+1);},
+  setTrain(v){if(this.on)this.rumG.gain.linearRampToValueAtTime(v*.16,this.ctx.currentTime+.8);},
+  setDrone(v){if(this.on)this.droneG.gain.linearRampToValueAtTime(v,this.ctx.currentTime+2.5);},
+  noise(buf,{f=800,type='lowpass',q=1,g=.2,a=.01,dur=.2,pan=0,delay=0}={}){
+    if(!this.on)return; const c=this.ctx,t=c.currentTime+delay;
+    const s=c.createBufferSource();s.buffer=buf;s.loop=true;
+    const fl=c.createBiquadFilter();fl.type=type;fl.frequency.value=f;fl.Q.value=q;
+    const gn=c.createGain();gn.gain.setValueAtTime(0,t);gn.gain.linearRampToValueAtTime(g,t+a);gn.gain.exponentialRampToValueAtTime(.0001,t+a+dur);
+    let last=gn;
+    if(c.createStereoPanner){const p=c.createStereoPanner();p.pan.value=pan;gn.connect(p);last=p;}
+    s.connect(fl).connect(gn);last.connect(this.out);s.start(t);s.stop(t+a+dur+.1);
+  },
+  tone(fr,{type='sine',g=.14,a=.01,dur=.4,pan=0,delay=0}={}){
+    if(!this.on)return; const c=this.ctx,t=c.currentTime+delay;
+    const o=c.createOscillator();o.type=type;o.frequency.value=fr;
+    const gn=c.createGain();gn.gain.setValueAtTime(0,t);gn.gain.linearRampToValueAtTime(g,t+a);gn.gain.exponentialRampToValueAtTime(.0001,t+a+dur);
+    let last=gn;
+    if(c.createStereoPanner){const p=c.createStereoPanner();p.pan.value=pan;gn.connect(p);last=p;}
+    o.connect(gn);last.connect(this.out);o.start(t);o.stop(t+a+dur+.1);
+  },
+  ding(){this.tone(784,{dur:.7,g:.09});this.tone(1046,{dur:1,g:.05,delay:.18});},
+  dingDong(){this.tone(659,{dur:.6,g:.1});this.tone(523,{dur:.9,g:.1,delay:.4});},
+  clack(){this.noise(this.white,{f:800+Math.random()*700,type:'bandpass',q:2,g:.05+.05*Math.random(),dur:.05,a:.004,pan:(Math.random()-.5)*.8});},
+  hiss(g=.22,dur=.6){this.noise(this.white,{f:3400,type:'highpass',g,dur,a:.05});},
+  thud(){this.tone(85,{type:'sine',g:.4,dur:.22,a:.004});},
+  step(v=.14){this.noise(this.brown,{f:240,g:v,dur:.11,a:.008});},
+  brake(dur=2.5){ if(!this.on)return; const c=this.ctx,t=c.currentTime;
+    const o=c.createOscillator();o.type='sawtooth';o.frequency.setValueAtTime(2300,t);o.frequency.exponentialRampToValueAtTime(650,t+dur);
+    const fl=c.createBiquadFilter();fl.type='bandpass';fl.frequency.value=1400;fl.Q.value=9;
+    const g=c.createGain();g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.085,t+.4);g.gain.linearRampToValueAtTime(0,t+dur);
+    o.connect(fl).connect(g).connect(this.out);o.start(t);o.stop(t+dur+.1);
+  },
+  heart(){this.tone(52,{g:.5,dur:.1,a:.005});this.tone(46,{g:.42,dur:.1,a:.005,delay:.14});},
+  stinger(){this.tone(55,{type:'sawtooth',g:.4,dur:.5,a:.005});this.noise(this.white,{f:2500,type:'highpass',g:.3,dur:.4});},
+  clank(pan){this.noise(this.brown,{f:170,g:.5,dur:.32,a:.006,pan});this.tone(210,{type:'triangle',g:.22,dur:.28,pan});},
+  whisper(n=3){for(let i=0;i<n;i++)this.noise(this.white,{f:2400,type:'bandpass',q:3,g:.05,dur:.15,a:.03,delay:i*.14});},
+  ringPattern(){ [1319,1319,1319,988].forEach((f,i)=>this.tone(f,{type:'square',g:.035,dur:.11,a:.005,delay:i*.16})); },
+  ring(on){ if(on&&!this._ringIv){this._ringIv=setInterval(()=>this.ringPattern(),2000);this.ringPattern();}
+    else if(!on&&this._ringIv){clearInterval(this._ringIv);this._ringIv=null;} },
+  killPersistent(){this.setAmb(0);this.setHum(0);this.setTrain(0);this.setDrone(0);}
+};
+
+/* ============================================================
+   الحالة العامة + واجهة
+============================================================ */
+const G={phase:'title',torch:false,battery:78,timeMin:47,timeAcc:0,
+  started:false,talked:false,exited:false,wentOut:false,mapState:0,
+  lightsOn:1,flickerHeavy:false,tubeKill:0,paperFlipped:false,
+  holdDone:false,holdPos:new THREE.Vector3(),dying:false,deaths:0,
+  heartRate:0,stareMode:false,pulseStare:false,canEmergency:false,emUsed:false,
+  calling:false,callAnswered:false,inDialog:false,choosing:false,phoneOpen:false,
+  look:{},observations:new Set(),moving:false,trainMoving:false,subBusy:false,skipIntro:false};
+
+function setTime(m){G.timeMin=m;renderClock();}
+function renderClock(){
+  const h24=Math.floor(G.timeMin/60)%24,h12=((h24+11)%12)+1,m=G.timeMin%60;
+  const t=ar(h12)+':'+ar(String(m).padStart(2,'0'));
+  $('clock').textContent=t+' ص';$('phTime').textContent=t;
+}
+function objective(t){if(!t){hide('objective');return;}$('objective').textContent=t;show('objective');}
+let toastT=null;
+function toast(t){$('toast').textContent=t;$('toast').style.opacity=1;clearTimeout(toastT);toastT=setTimeout(()=>$('toast').style.opacity=0,3400);}
+async function sub(who,text,dur=3000){
+  G.subBusy=true;show('subtitle');$('subWho').textContent=who;$('subTxt').textContent=text;
+  await wait(dur);hide('subtitle');G.subBusy=false;
+}
+function fadeTo(v,dur=1000){$('fade').style.transition=`opacity ${dur}ms`;$('fade').style.opacity=v;}
+function nextStationHUD(t){const e=$('nextStation');if(!t){e.classList.remove('on');e.textContent='';return;}e.textContent='المحطة القادمة: '+t;e.classList.add('on');}
+function announce(name){setLED('المحطة القادمة: '+name);nextStationHUD(name);S.dingDong();toast('«المحطة القادمة: '+name+'»');}
+
+/* نظام الملاحظة — قلب اللعبة */
+const NOTE_DEFS={
+  advice:'نصيحة عامل النظافة: «متبصيش لحد في العربية كتير.»',
+  trainNo:'لوحة على جدار العربية: قطر رقم ١٩٤٧.',
+  paper:'الراجل الكبير ماسك الجريدة… مقلوبة.',
+  eyes:'البنت نايمة على كتف أمها… وعينيها مفتوحين.',
+  phones:'سماعات الشاب في ودانه… ومفيش أي صوت طالع منها.',
+  gone:'راكبة من الستة اختفت بعد «النهاية»… ومحدش لاحظ غيري.',
+  map:'محطة اسمها «النهاية» مش موجودة على خريطة الخط الأول.',
+  clue:'خبر قديم: حادث مترو سنة ٢٠٠٩… والقطر رقمه ١٩٤٧.',
+  button:'ضغطتي زر الطوارئ… فلفّوا كلهم في نفس اللحظة.'
+};
+function observe(id){ if(G.observations.has(id))return; G.observations.add(id);
+  toast('ملاحظة اتسجّلت في الموبايل — تبويب «ملاحظات»'); S.tone(1245,{g:.06,dur:.25});
+  renderNotes();
+}
+function renderNotes(){const box=$('scrNotes');box.innerHTML='';
+  [...G.observations].forEach(id=>{const r=document.createElement('div');r.className='note-row';r.textContent=NOTE_DEFS[id];box.appendChild(r);});
+  if(!G.observations.size)box.innerHTML='<div class="ph-note" style="padding-top:30px">لسه مضيتيش بالعين…<br>ركّزي في التفاصيل الصغيرة.</div>';
+}
+const MESSAGES=[];
+function renderMsgs(){const box=$('scrMsgs');box.innerHTML='';
+  MESSAGES.forEach(m=>{const d=document.createElement('div');d.className='msg';
+    d.innerHTML=`<div class="from">${m.from}</div><div class="body">${m.body}</div>`;box.appendChild(d);});
+  if(!MESSAGES.length)box.innerHTML='<div class="ph-note" style="padding-top:30px">مفيش رسائل… لحد دلوقتي.</div>';
+}
+function addMsg(from,body){MESSAGES.push({from,body});renderMsgs();toast('رسالة جديدة — M');S.tone(988,{g:.07,dur:.15});S.tone(1319,{g:.07,dur:.25,delay:.12});}
+function updateBattUI(){
+  const b=Math.max(0,Math.round(G.battery));
+  $('battFill').style.width=b+'%';$('battPct').textContent=ar(b)+'٪';$('phBatt').textContent=ar(b)+'٪';
+}
+
+/* ============================================================
+   الحوار
+============================================================ */
+function showLine(who,text){
+  return new Promise(res=>{
+    $('dlgWho').textContent=who||''; const txt=$('dlgTxt'); txt.textContent='';
+    let i=0,done=false,fin=false;
+    const iv=setInterval(()=>{i+=2;txt.textContent=text.slice(0,i);if(i>=text.length){clearInterval(iv);done=true;}},26);
+    const fin2=()=>{if(!done){clearInterval(iv);txt.textContent=text;done=true;return;}if(fin)return;fin=true;cleanup();res();};
+    const key=e=>{if(e.code==='Space'||e.code==='Enter'||e.code==='KeyE'){e.preventDefault();fin2();}};
+    const md=()=>fin2();
+    const cleanup=()=>{removeEventListener('keydown',key);removeEventListener('mousedown',md);};
+    addEventListener('keydown',key);addEventListener('mousedown',md);
+  });
+}
+function choose(opts){
+  return new Promise(res=>{
+    G.choosing=true; document.exitPointerLock&&document.exitPointerLock();
+    const box=$('dlgChoices');box.innerHTML='';
+    const done=i=>{removeEventListener('keydown',key);box.innerHTML='';G.choosing=false;tryLock();res(i);};
+    opts.forEach((o,i)=>{const b=document.createElement('button');
+      b.innerHTML=`<span class="num">${ar(i+1)}.</span>${o.t}`;
+      b.onclick=e=>{e.stopPropagation();done(i);};box.appendChild(b);});
+    const key=e=>{const n=parseInt(e.key);if(n>=1&&n<=opts.length)done(n-1);};
+    addEventListener('keydown',key);
+  });
+}
+async function dlg(nodes){
+  G.inDialog=true; show('dialog');
+  for(const n of nodes){
+    if(n.c){const i=await choose(n.c);for(const ln of n.c[i].then)await showLine(ln.w,ln.t);}
+    else await showLine(n.w,n.t);
+  }
+  hide('dialog');G.inDialog=false;
+}
+
+/* ============================================================
+   المشهد ثلاثي الأبعاد
+============================================================ */
+const renderer=new THREE.WebGLRenderer({canvas:$('gl'),antialias:true});
+renderer.setPixelRatio(Math.min(devicePixelRatio,1.75));
+renderer.setSize(innerWidth,innerHeight);
+renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.15;
+const scene=new THREE.Scene();
+scene.fog=new THREE.FogExp2(0x000000,.055);
+scene.add(new THREE.AmbientLight(0x15151a,.5));
+const camera=new THREE.PerspectiveCamera(70,innerWidth/innerHeight,.05,240);
+camera.rotation.order='YXZ';
+scene.add(camera);
+addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);});
+
+const M={
+  concreteD:new THREE.MeshStandardMaterial({color:0x33312d,roughness:.95}),
+  tile:new THREE.MeshStandardMaterial({color:0x847c6d,roughness:.9}),
+  stripe:new THREE.MeshStandardMaterial({color:0x6e3a2f,roughness:.85}),
+  floorT:new THREE.MeshStandardMaterial({color:0x393834,roughness:.9}),
+  metal:new THREE.MeshStandardMaterial({color:0x70747a,roughness:.4,metalness:.75}),
+  metalD:new THREE.MeshStandardMaterial({color:0x2a2c2e,roughness:.6,metalness:.5}),
+  yellow:new THREE.MeshStandardMaterial({color:0xa8862c,roughness:.55}),
+  cream:new THREE.MeshStandardMaterial({color:0x9a9484,roughness:.9}),
+  seat:new THREE.MeshStandardMaterial({color:0x47543f,roughness:.85}),
+  glass:new THREE.MeshStandardMaterial({color:0x9fb2b8,transparent:true,opacity:.15,roughness:.15,metalness:.3}),
+  black:new THREE.MeshStandardMaterial({color:0x0a0a0a,roughness:.95}),
+  silver:new THREE.MeshStandardMaterial({color:0x9da0a2,roughness:.5,metalness:.4}),
+  red:new THREE.MeshStandardMaterial({color:0x7e1f14,roughness:.6}),
+};
+function box(w,h,d,mat,x,y,z,parent){const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat);m.position.set(x,y,z);(parent||scene).add(m);return m;}
+function textTex(text,{w=512,h=128,bg='#0b0b0a',fg='#e6d79c',font='500 46px Rubik'}={}){
+  const c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d');
+  x.fillStyle=bg;x.fillRect(0,0,w,h);x.fillStyle=fg;x.font=font;x.textAlign='center';x.textBaseline='middle';x.direction='rtl';
+  x.fillText(text,w/2,h/2+2);
+  const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;t.anisotropy=4;return t;
+}
+function newsTex(headline,sub,date){
+  const c=document.createElement('canvas');c.width=256;c.height=340;const x=c.getContext('2d');
+  x.fillStyle='#cfc7b0';x.fillRect(0,0,256,340);
+  x.fillStyle='#1c1a16';x.textAlign='center';x.direction='rtl';
+  x.font='700 26px Rubik';x.fillText(headline,128,46,236);
+  x.fillRect(16,64,224,2);
+  x.font='500 16px Rubik';x.fillText(sub,128,90,236);
+  x.font='400 14px Rubik';x.fillText(date,128,114);
+  x.fillStyle='#5a554a';
+  for(let i=0;i<12;i++)x.fillRect(20,138+i*16,216*(.6+((i*37)%40)/100),4);
+  const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;return t;
+}
+function plane(tex,w,h){return new THREE.Mesh(new THREE.PlaneGeometry(w,h),new THREE.MeshBasicMaterial({map:tex}));}
+function lightPoint(color,i,d,x,y,z,parent){const l=new THREE.PointLight(color,i,d,2);l.position.set(x,y,z);(parent||scene).add(l);return l;}
+
+/* بناء بشرية مبسّطة */
+function person({skin=0x9c7a5e,shirt=0x3a3f46,pants=0x2c2c30,hair=0x1c1712,seated=true,scale=1}={}){
+  const g=new THREE.Group();
+  const sm=new THREE.MeshStandardMaterial({color:skin,roughness:.9});
+  const cm=new THREE.MeshStandardMaterial({color:shirt,roughness:.95});
+  const pm=new THREE.MeshStandardMaterial({color:pants,roughness:.95});
+  const hm=new THREE.MeshStandardMaterial({color:hair,roughness:1});
+  const torso=new THREE.Mesh(new THREE.BoxGeometry(.4,.56,.22),cm);
+  const head=new THREE.Group();
+  const skull=new THREE.Mesh(new THREE.SphereGeometry(.105,14,12),sm);skull.position.y=.1;head.add(skull);
+  const nose=new THREE.Mesh(new THREE.BoxGeometry(.03,.032,.05),sm);nose.position.set(0,.1,.1);head.add(nose);
+  const hairM=new THREE.Mesh(new THREE.SphereGeometry(.112,12,10),hm);hairM.scale.set(1,.8,1);hairM.position.set(0,.135,-.02);head.add(hairM);
+  const armL=new THREE.Mesh(new THREE.BoxGeometry(.09,.42,.09),cm);
+  const armR=armL.clone();
+  if(seated){
+    torso.position.y=.84; head.position.y=1.17;
+    const thigh=new THREE.Mesh(new THREE.BoxGeometry(.36,.09,.44),pm);thigh.position.set(0,.52,.17);
+    const shin=new THREE.Mesh(new THREE.BoxGeometry(.32,.46,.1),pm);shin.position.set(0,.26,.37);
+    armL.position.set(-.25,.82,.05);armL.rotation.x=-.45;
+    armR.position.set(.25,.82,.05);armR.rotation.x=-.45;
+    g.add(thigh,shin,torso,armL,armR,head);
+  }else{
+    torso.position.y=1.15; head.position.y=1.62;
+    const legL=new THREE.Mesh(new THREE.BoxGeometry(.16,.88,.17),pm);legL.position.set(-.1,.44,0);
+    const legR=legL.clone();legR.position.x=.1;
+    armL.position.set(-.25,1.12,0);armR.position.set(.25,1.12,0);
+    g.add(legL,legR,torso,armL,armR,head);
+  }
+  g.scale.setScalar(scale);
+  g.userData={head,torso,phase:Math.random()*9};
+  return g;
+}
+
+/* تتبّع الرأس */
+const _tmp=new THREE.Object3D(),_q1=new THREE.Quaternion(),_q2=new THREE.Quaternion();
+function trackHead(head,amt){
+  head.getWorldPosition(_tmp.position);_tmp.lookAt(camera.position);
+  head.parent.getWorldQuaternion(_q1).invert();
+  _q2.copy(_tmp.quaternion).premultiply(_q1);
+  head.quaternion.slerp(_q2,amt);
+}
+
+/* الاصطدام */
+const COLS=[]; const activeSets=new Set(['start']);
+function addCol(set,minX,maxX,minZ,maxZ,dz){COLS.push({set,minX,maxX,minZ,maxZ,dz:!!dz,enabled:true});}
+function collide(p,r){
+  for(const c of COLS){
+    if(!activeSets.has(c.set)||c.enabled===false)continue;
+    const off=c.dz?worldG.position.z:0;
+    const minZ=c.minZ+off,maxZ=c.maxZ+off;
+    if(p.x>c.minX-r&&p.x<c.maxX+r&&p.z>minZ-r&&p.z<maxZ+r){
+      const dx1=p.x-(c.minX-r),dx2=(c.maxX+r)-p.x,dz1=p.z-(minZ-r),dz2=(maxZ+r)-p.z;
+      const m=Math.min(dx1,dx2,dz1,dz2);
+      if(m===dx1)p.x=c.minX-r;else if(m===dx2)p.x=c.maxX+r;else if(m===dz1)p.z=minZ-r;else p.z=maxZ+r;
+    }
+  }
+}
+
+/* التفاعل */
+const INTERACT=[];
+function reg(mesh,label,onUse,when){mesh.userData.label=label;mesh.userData.onUse=onUse;mesh.userData.when=when;INTERACT.push(mesh);}
+function hitProxy(w,h,d,x,y,z,parent,label,onUse,when){
+  const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),new THREE.MeshBasicMaterial({visible:false}));
+  m.position.set(x,y,z);(parent||scene).add(m);
+  if(label)reg(m,label,onUse,when);
+  return m;
+}
+
+/* ============================================================
+   بناء العالم
+============================================================ */
+const worldG=new THREE.Group();scene.add(worldG);
+const trainG=new THREE.Group();scene.add(trainG);
+let cleaner,doorL,doorR,doorCol,ledTex,ledCv,ledCtx;
+let tubeMats=[],cabinLights=[],passengers={},hits={},newsMesh,newsHit,entity,entLight,boardHit;
+
+function setLED(text){
+  ledCtx.fillStyle='#050505';ledCtx.fillRect(0,0,512,64);
+  ledCtx.fillStyle='#e2b13a';ledCtx.font='700 42px Rubik';ledCtx.textAlign='center';ledCtx.textBaseline='middle';ledCtx.direction='rtl';
+  ledCtx.fillText(text,256,34);ledTex.needsUpdate=true;
+}
+
+function buildPlatform(set,z0,name,dark){
+  const g=worldG;
+  box(5,.2,72,dark?M.concreteD:M.floorT,3.95,-.1,z0,g);
+  const yl=new THREE.Mesh(new THREE.PlaneGeometry(.35,72),new THREE.MeshStandardMaterial({color:0xb59a3a,roughness:.8}));
+  yl.rotation.x=-Math.PI/2;yl.position.set(1.72,.01,z0);g.add(yl);
+  box(.3,4.4,72,dark?M.black:M.tile,6.55,2.2,z0,g);
+  box(.06,.55,72,M.stripe,6.37,1.45,z0,g);
+  box(9.5,.3,72,M.concreteD,3.6,4.35,z0,g);
+  for(let z=z0-28;z<=z0+28;z+=8){
+    const c=new THREE.Mesh(new THREE.CylinderGeometry(.17,.17,4.2,10),M.concreteD);c.position.set(4.6,2.1,z);g.add(c);
+  }
+  const tubeMatP=new THREE.MeshStandardMaterial({color:0xf2ecd8,emissive:0xfff3d6,emissiveIntensity:dark?.5:1.5});
+  for(let z=z0-24;z<=z0+24;z+=12){
+    const mat=(dark&&z===z0-12)?G.endFlickMat:tubeMatP;
+    box(.12,.05,2.4,mat,4.6,4.05,z,g);
+    if(!dark)lightPoint(0xffe9c4,10,16,3.4,3.8,z,g);
+    else lightPoint(0x9fb4c8,3.5,13,3.4,3.8,z,g);
+  }
+  const sgn=plane(textTex(name,{w:512,h:128,bg:dark?'#20080a':'#12314e',fg:dark?'#c96a55':'#e8e2d0',font:'700 74px "Aref Ruqaa"'}),2.6,.62);
+  sgn.position.set(3.9,3.32,z0-6);g.add(sgn);
+  if(!dark){
+    const ad1=plane(textTex('الخط الأول — المرج ⇄ حلوان',{w:512,h:96,bg:'#173a5c',fg:'#dfe6ea'}),2.2,.42);
+    ad1.rotation.y=-Math.PI/2;ad1.position.set(6.38,2.4,z0+6);g.add(ad1);
+    const ad2=plane(textTex('فول وطعمية عم عباس — فاتح ٥ ص',{w:512,h:96,bg:'#20242a',fg:'#c9b47e'}),2.2,.42);
+    ad2.rotation.y=-Math.PI/2;ad2.position.set(6.38,2.4,z0-14);g.add(ad2);
+  }
+  for(const dz of(dark?[-9,9,-16]:[-9,9])){
+    box(.5,.06,2.6,M.metal,6,.48,z0+dz,g);
+    box(.5,.44,.08,M.metalD,6.15,.24,z0+dz,g);
+  }
+  for(const ez of[z0-31.8,z0+31.8])box(5.2,4.4,.3,M.concreteD,3.95,2.2,ez,g);
+  if(!dark){
+    for(let i=0;i<9;i++){const b=new THREE.Mesh(new THREE.CylinderGeometry(.02,.02,3.6,6),M.metalD);b.position.set(2.1+i*.42,2,31.7);g.add(b);}
+    box(5.2,.12,.12,M.metal,3.95,3.9,31.7,g);box(5.2,.12,.12,M.metal,3.95,.3,31.7,g);
+  }
+  addCol(set,5.9,6.75,z0-36,z0+36,true);
+  addCol(set,-6,1.28,z0-36,z0-.9,true);
+  addCol(set,-6,1.28,z0+.9,z0+36,true);
+  addCol(set,1.3,1.56,z0-36,z0-.95,true);
+  addCol(set,1.3,1.56,z0+.95,z0+36,true);
+  addCol(set,1.3,6.75,z0+31.6,z0+36,true);
+  addCol(set,1.3,6.75,z0-36,z0-31.6,true);
+  if(dark)buildEndProps(z0);
+}
+
+function buildEndProps(z0){
+  const g=worldG;
+  box(1.5,2.3,.15,M.metalD,5.9,1.15,z0+10,g);
+  const stfS=plane(textTex('للموظفين فقط',{w:512,h:96,bg:'#171717',fg:'#c9b47e'}),1.1,.24);
+  stfS.rotation.y=-Math.PI/2;stfS.position.set(5.8,2.1,z0+10);g.add(stfS);
+  hitProxy(1.7,2.5,.6,5.9,1.2,z0+10,g,'جرّبي الباب',async()=>{
+    await dlg([{w:'ليان',t:'مقفول. محتاجة كارت مغناطيسي.'},{w:'ليان',t:'…مفيش حد هنا من سنين. مين اللي بيقفله؟'}]);
+  },()=>G.phase==='choice');
+  const oldNews=new THREE.Mesh(new THREE.PlaneGeometry(.5,.66),new THREE.MeshBasicMaterial({map:newsTex('حادث مأساوي بالمترو','تصادم بالخط الأول','٢٠٠٩')}));
+  oldNews.rotation.x=-Math.PI/2;oldNews.rotation.z=.4;oldNews.position.set(6,.53,z0-9);g.add(oldNews);
+  hitProxy(.9,.8,.9,6,.6,z0-9,g,'قري الجريدة القديمة',async()=>{
+    observe('clue');
+    await dlg([
+      {w:'جريدة قديمة — ٢٠٠٩',t:'«تصادم مأساوي بين قطارين بالخط الأول… خروج عربيات عن القضبان داخل النفق…»'},
+      {w:'جريدة قديمة',t:'آخر سطر: «القطر المتسبب رقمه ١٩٤٧». …نفس رقم العربية اللي أنا واقفة جواها.'},
+      {w:'ليان',t:'دلوقتي فهمت ليه المحطة دي شكلها… معروفة.'}]);
+  },()=>G.phase==='choice');
+  for(let i=0;i<4;i++){
+    box(.5,.6,.4,M.metalD,6.1,.9,z0-14-i*.7,g);
+    const num=plane(textTex(ar([9,12,17,23][i]),{w:64,h:64,bg:'#222',fg:'#c9b47e',font:'700 34px Rubik'}),.2,.2);
+    num.rotation.y=-Math.PI/2;num.position.set(5.83,1.1,z0-14-i*.7);g.add(num);
+  }
+  hitProxy(2.6,1,2.4,6.1,.9,z0-15,g,'شوفي الخزائن',async()=>{
+    await dlg([{w:'ملاحظة',t:'أربع خزائن بأرقام: ٩، ١٢، ١٧، ٢٣.'},{w:'ملاحظة',t:'الخزينة رقم ١٧… عليها غبار أقل من الباقي. حد فتحها قريب.'}]);
+  },()=>G.phase==='choice');
+}
+
+function buildPassStation(z0,name){
+  const g=worldG;
+  box(5,.2,60,M.concreteD,3.95,-.1,z0,g);
+  box(.3,4.4,60,M.concreteD,6.55,2.2,z0,g);
+  box(9.5,.3,60,M.concreteD,3.6,4.35,z0,g);
+  for(let z=z0-24;z<=z0+24;z+=8){
+    const c=new THREE.Mesh(new THREE.CylinderGeometry(.17,.17,4.2,10),M.concreteD);c.position.set(4.6,2.1,z);g.add(c);
+  }
+  const sgn=plane(textTex(name,{w:512,h:128,bg:'#10233a',fg:'#cfd8de',font:'700 72px "Aref Ruqaa"'}),2.6,.62);
+  sgn.position.set(3.9,3.3,z0-4);g.add(sgn);
+  const tunMat=new THREE.MeshStandardMaterial({color:0x222222,emissive:0x8a7d5a,emissiveIntensity:.9});
+  for(let z=z0-20;z<=z0+20;z+=10)box(.1,.05,2,tunMat,4.6,4.05,z,g);
+  for(const dz of[-6,3,12]){
+    const p=person({skin:0x6b6558,shirt:0x2f2f33,seated:true});
+    p.position.set(5.2,-.08,z0+dz);p.rotation.y=-Math.PI/2;g.add(p);
+  }
+}
+
+function buildWorld(){
+  G.endFlickMat=new THREE.MeshStandardMaterial({color:0xf2ecd8,emissive:0xfff3d6,emissiveIntensity:1});
+  buildPlatform('start',0,'العتبة',false);
+  buildPassStation(-170,'الشهداء');
+  buildPassStation(-340,'السادات');
+  buildPlatform('end',-560,'النهاية',true);
+  box(14,.2,840,M.black,.4,-1.2,-230,worldG);
+  for(const rx of[-.55,.55]){
+    const r=new THREE.Mesh(new THREE.CylinderGeometry(.055,.055,830,8),M.metalD);
+    r.rotation.x=Math.PI/2;r.position.set(rx,-1.05,-230);worldG.add(r);
+  }
+  box(.6,5,840,M.concreteD,-4.2,2.5,-230,worldG);
+  for(let z=-640;z<190;z+=8)box(.22,5,.3,M.black,-3.85,2.5,z,worldG);
+  for(const h of[2.1,2.5,2.9]){
+    const c=new THREE.Mesh(new THREE.CylinderGeometry(.018,.018,830,5),M.black);
+    c.rotation.x=Math.PI/2;c.position.set(-3.95,h,-230);worldG.add(c);
+  }
+  const gaps=[[-640,-594],[-526,-314],[-366,-144],[-196,44]];
+  for(const[a,b]of gaps){
+    box(.6,5,b-a,M.concreteD,4.2,2.5,(a+b)/2,worldG);
+    for(let z=a+4;z<b;z+=8)box(.22,5,.3,M.black,3.85,2.5,z,worldG);
+    for(const h of[2.3,2.7]){
+      const c=new THREE.Mesh(new THREE.CylinderGeometry(.018,.018,b-a-2,5),M.black);
+      c.rotation.x=Math.PI/2;c.position.set(3.95,h,(a+b)/2);worldG.add(c);
+    }
+  }
+  const tunMat=new THREE.MeshStandardMaterial({color:0x1c1c1c,emissive:0x9c8f6a,emissiveIntensity:.7});
+  for(let z=-640;z<190;z+=16)box(.12,.05,.8,tunMat,.4,3.3,z,worldG);
+  box(12,5,.5,M.black,.4,2.5,-641,worldG);
+  const sig=new THREE.Mesh(new THREE.PlaneGeometry(.3,.3),new THREE.MeshBasicMaterial({color:0xff2a1a}));
+  sig.position.set(.4,1.6,-640.6);worldG.add(sig);
+  cleaner=person({skin:0x8f6e52,shirt:0x53513a,pants:0x3d3d3d});
+  cleaner.position.set(5.5,0,27.5);cleaner.rotation.y=Math.PI*1.25;worldG.add(cleaner);
+  box(.7,.75,.95,M.metalD,4.9,.45,28.6,worldG);
+  box(.74,.06,.99,M.yellow,4.9,.84,28.6,worldG);
+  const broom=new THREE.Mesh(new THREE.CylinderGeometry(.015,.015,1.3,6),M.yellow);
+  broom.rotation.z=.4;broom.position.set(5.9,.65,29);worldG.add(broom);
+  hitProxy(1.2,2,1.2,5.5,1,27.5,worldG,'اتكلمي مع عامل النظافة',async()=>{
+    if(!G.talked){
+      G.talked=true;
+      await dlg([
+        {w:'ليان',t:'لو سمحت… آخر مترو لسه؟'},
+        {w:'عامل النظافة',t:'…'},
+        {w:'عامل النظافة',t:'لسه واحد. بس لو لحقته اركبيه.'},
+        {w:'عامل النظافة',t:'ومتنسيش اللي هقولك عليه: متبصيش لحد في العربية كتير. الناس هنا… بتكره البص.'},
+        {w:'ليان',t:'…تمام. شكرًا.'}]);
+      observe('advice');
+      objective('استني القطر على الرصيف');
+    }else{
+      await dlg([{w:'عامل النظافة',t:'روحي أول الرصيف يا بنتي… القطر جاي.'}]);
+    }
+  },()=>G.phase==='platform');
+}
+
+/* ============================================================
+   بناء القطر
+============================================================ */
+function buildTrain(){
+  trainG.position.z=175;
+  box(2.5,.12,24.4,M.floorT,0,-.06,0,trainG);
+  box(2.5,.12,24.4,M.cream,0,2.36,0,trainG);
+  for(const sx of[-1,1]){
+    const wx=sx*1.26;
+    const segs=sx>0?[[-12.2,-1.7],[1.7,12.2]]:[[-12.2,12.2]];
+    for(const[a,b]of segs){
+      const len=b-a,cz=(a+b)/2;
+      box(.08,.95,len,M.cream,wx,.475,cz,trainG);
+      box(.03,.68,len,M.glass,wx,1.29,cz,trainG);
+      box(.08,.5,len,M.cream,wx,2.1,cz,trainG);
+      for(let z=a+.6;z<b;z+=2.4)box(.1,1.5,.16,M.metal,wx,1.29,z,trainG);
+    }
+    const bsegs=sx>0?[[-11.2,-2.6],[2.6,11.2]]:[[-11.2,11.2]];
+    for(const[a,b]of bsegs){
+      const len=b-a,cz=(a+b)/2;
+      box(.46,.09,len,M.seat,sx*1.02,.46,cz,trainG);
+      box(.46,.3,len,M.metalD,sx*1.02,.2,cz,trainG);
+      const back=box(.08,.5,len,M.seat,sx*1.2,.75,cz,trainG);back.rotation.z=sx*.18;
+      addCol('train',Math.min(sx*.78,sx*1.3),Math.max(sx*.78,sx*1.3),a-.05,b+.05);
+    }
+  }
+  for(const ez of[-12.15,12.15]){
+    box(2.5,2.4,.12,M.cream,0,1.2,ez,trainG);
+    box(1,.7,.02,M.black,-.4,1.7,ez-Math.sign(ez)*.08,trainG);
+  }
+  for(const sx of[-1,1]){
+    box(.04,.75,24.5,M.silver,sx*1.38,.52,0,trainG);
+    box(.04,.45,24.5,M.silver,sx*1.38,2.12,0,trainG);
+    box(.05,.09,24.5,M.stripe,sx*1.38,1,0,trainG);
+  }
+  box(2.9,.15,24.5,M.silver,0,2.45,0,trainG);
+  box(2.9,.5,24.5,M.black,0,-.28,0,trainG);
+  for(const wz of[-8,8])for(const wx of[-.7,.7]){
+    const w=new THREE.Mesh(new THREE.CylinderGeometry(.32,.32,.1,14),M.black);
+    w.rotation.z=Math.PI/2;w.position.set(wx,-.55,wz);trainG.add(w);
+  }
+  doorL=box(.06,1.9,.78,M.cream,1.3,.97,-.39,trainG);
+  doorR=box(.06,1.9,.78,M.cream,1.3,.97,.39,trainG);
+  box(.03,.5,.4,M.glass,1.34,1.4,-.39,doorL);
+  box(.03,.5,.4,M.glass,1.34,1.4,.39,doorR);
+  doorCol=addCol('train',1.05,1.42,-.8,.8);
+  addCol('train',1.14,1.36,-12.2,-.85);
+  addCol('train',1.14,1.36,.85,12.2);
+  addCol('train',-1.36,-1.14,-12.2,12.2);
+  addCol('train',-1.4,1.4,-12.5,-12.1);
+  addCol('train',-1.4,1.4,12.1,12.5);
+  for(const z of[-9,-3,3,9]){
+    const mat=new THREE.MeshStandardMaterial({color:0xf2ecd8,emissive:0xfff3d6,emissiveIntensity:1.6});
+    tubeMats.push(mat);
+    box(.09,.05,2.2,mat,0,2.28,z,trainG);
+    cabinLights.push(lightPoint(0xfff0d0,2.2,7,0,2.1,z,trainG));
+  }
+  ledCv=document.createElement('canvas');ledCv.width=512;ledCv.height=64;ledCtx=ledCv.getContext('2d');
+  ledTex=new THREE.CanvasTexture(ledCv);ledTex.colorSpace=THREE.SRGBColorSpace;
+  setLED('آخر قطار — المرج');
+  const led1=plane(ledTex,1.5,.2);led1.rotation.y=-Math.PI/2;led1.position.set(1.21,2.02,0);trainG.add(led1);
+  const led2=plane(ledTex,1.5,.2);led2.rotation.y=Math.PI/2;led2.position.set(-1.21,2.02,-7);trainG.add(led2);
+  const plq=plane(textTex('قطر ١٩٤٧',{w:256,h:96,bg:'#1a1a18',fg:'#c9c2ad',font:'600 44px Rubik'}),.5,.19);
+  plq.rotation.y=-Math.PI/2;plq.position.set(1.21,1.95,4.5);trainG.add(plq);
+  hitProxy(.6,.4,.3,1.21,1.95,4.5,trainG,'اقري اللوحة',async()=>{
+    observe('trainNo');
+    await dlg([{w:'ملاحظة',t:'لوحة صغيرة على جدار العربية: «قطر رقم ١٩٤٧».'}]);
+  },()=>G.boarded);
+  box(.08,.18,.12,M.red,1.22,1.28,-1.3,trainG);
+  hitProxy(.3,.4,.4,1.2,1.28,-1.3,trainG,'زر الطوارئ',()=>emergencyBeat(),()=>G.canEmergency&&!G.emUsed);
+  for(const z of[-6,0,6]){
+    const bar=new THREE.Mesh(new THREE.CylinderGeometry(.02,.02,2.2,8),M.metal);
+    bar.rotation.x=Math.PI/2;bar.position.set(0,2,z);trainG.add(bar);
+    for(const x of[-.35,.35]){
+      const v=new THREE.Mesh(new THREE.CylinderGeometry(.015,.015,.35,6),M.metal);
+      v.position.set(x,1.82,z);trainG.add(v);
+    }
+  }
+  buildPassengers();
+  buildEntity();
+  boardHit=hitProxy(1.2,2,1.6,1.3,1,0,trainG,null,null,null);
+}
+
+/* الركاب */
+function buildPassengers(){
+  const mk=(id,opt,x,z,ry,scale)=>{
+    const g=person({...opt,scale});
+    g.position.set(x,-.06,z);g.rotation.y=ry;trainG.add(g);
+    passengers[id]=g;
+    hits[id]=hitProxy(1.1,1.7,1,0,.8,0,g,'بصّي للراكب',()=>passengerLook(id),()=>G.boarded&&G.lightsOn&&g.visible);
+    return g;
+  };
+  mk('old',{skin:0x9a7c60,shirt:0x4a4438,pants:0x333333},1.02,8,-Math.PI/2);
+  mk('mother',{skin:0x8f6e52,shirt:0x5c4a56,pants:0x3a3340},-1.02,6,Math.PI/2);
+  mk('child',{skin:0x9a7c60,shirt:0x7a6a52,pants:0x554c3e,hair:0x2a2117},-1.02,5.3,Math.PI/2,.58);
+  mk('young',{skin:0x9c7a5e,shirt:0x37404d,pants:0x2c2c30},-1.02,2,Math.PI/2);
+  mk('girl',{skin:0xa5836a,shirt:0x4d4453,pants:0x333},1.02,-3,-Math.PI/2);
+  mk('worker',{skin:0x8f6e52,shirt:0x53513a,pants:0x3d3d3d},-1.02,-7,Math.PI/2);
+  mk('strange',{skin:0xb6b0a2,shirt:0x3f4045,pants:0x2b2b2e},1.02,-10.5,-Math.PI/2);
+  passengers.worker.userData.torso.rotation.x=.22;
+  passengers.child.userData.head.rotation.x=.35;
+  newsMesh=new THREE.Mesh(new THREE.PlaneGeometry(.42,.58),
+    new THREE.MeshBasicMaterial({map:newsTex('الأهرام','اقتصاد ومجتمع','الخميس')}));
+  newsMesh.position.set(.55,.85,8);newsMesh.rotation.y=-Math.PI/2;trainG.add(newsMesh);
+  newsHit=hitProxy(.6,.7,.4,1.02,.8,8,trainG,null,null,null);
+}
+
+function linesFor(id){
+  const n=G.look[id]||1;
+  if(id==='old'){
+    if(!passengers.old.visible)return['مكانه فاضي… والجريدة لسه مستنية حد يكمّلها.'];
+    if(G.paperFlipped)return['الراجل الكبير لسه ماسك الجريدة…','…مقلوبة. مقلوبة بالكامل. وهو مكمّل قراءة عادي.'];
+    return['راجل كبير بيقرأ جريدة أمس.','مفيش أي حركة منه. ولا نفس.'];
+  }
+  if(id==='mother')return n<2?['ست وبتها… البنت نايمة على كتفها.','الأم ساكتة وسماعة في ودانها.']:['…رجعت بصّيت تاني.','عين البنت… مفتوحين. من الأول.'];
+  if(id==='child')return['البنت صغيرة… ماسكة إيد أمها في النوم.','إيدها شكلها باردة من هنا.'];
+  if(id==='young')return['شاب بسماعات… بيبص في موبايله.','مفيش أي صوت طالع من السماعات. والموبايل نفسه… مقفول من ساعة ما ركب.'];
+  if(id==='girl')return['بنت قاعدة لوحدها وبتبص للباب.','كأنها مستنية محطة معيّنة. لسه مش واصلين ليها.'];
+  if(id==='worker')return['عامل بهدوم مليانة تراب أبيض — زي الجبس.','نايم من أول ما ركبنا… ولا اتنفس.'];
+  if(id==='strange')return G.mapState>=1?['لسه في نفس المكان. في نفس النظرة.','…مش بيرمش. من ساعة ما ركبت.']:['راجل قاعد في آخر العربية.','ساكن خالص. مفيش حاجة فيه بتهتز.'];
+  return['…'];
+}
+async function passengerLook(id){
+  G.look[id]=(G.look[id]||0)+1;
+  const L=linesFor(id);
+  await dlg(L.map(t=>({w:'ملاحظة',t})));
+  const obs={mother:'eyes',young:'phones'}[id];
+  if(obs)observe(obs);
+  if(id==='old'&&G.paperFlipped)observe('paper');
+}
+
+function dropNewspaper(){
+  newsMesh.position.set(1.02,.575,8);
+  newsMesh.rotation.set(-Math.PI/2,0,.5);
+  reg(newsHit,'بصّي للمقعد',async()=>{
+    observe('clue');
+    await dlg([
+      {w:'ملاحظة',t:'الجريدة لسه دافية… ومفيش حد قاعد هنا.'},
+      {w:'ملاحظة',t:'الصفحة اللي كان بيقراها: خبر عن حادث مترو. من ٢٠٠٩.'}]);
+  },()=>G.boarded&&!passengers.old.visible);
+}
+
+function buildEntity(){
+  entity=person({skin:0xb4ada0,shirt:0x3a3b40,pants:0x26262a,seated:false});
+  entity.visible=false;trainG.add(entity);
+  entLight=lightPoint(0x8090a8,.8,4.5,0,1.75,0,entity);
+}
+
+/* ============================================================
+   الموبايل + الخريطة
+============================================================ */
+let mapCtx,phoneTab='torch';
+function drawMap(){
+  if(!mapCtx)return;
+  const x=mapCtx;x.fillStyle='#0d0d0c';x.fillRect(0,0,190,310);
+  let stops;
+  if(G.mapState===0)stops=['المرج','منشية الصدر','الدمرداش','غمرة','جمال عبد الناصر','السادات','الشهداء','العتبة'];
+  else if(G.mapState===1)stops=['المرج','منشية الصدر','الدمرداش','غمرة','النهاية','السادات','الشهداء','العتبة'];
+  else stops=['١٧ ؟','المرج','منشية الصدر','الدمرداش','غمرة','النهاية','السادات','الشهداء','العتبة'];
+  const n=stops.length,top=30,bot=288,step=(bot-top)/(n-1);
+  x.strokeStyle='#3a3a35';x.lineWidth=3;x.beginPath();x.moveTo(58,top);x.lineTo(58,bot);x.stroke();
+  x.textAlign='right';x.textBaseline='middle';
+  stops.forEach((s,i)=>{
+    const y=top+i*step,here=s==='العتبة',sp=s==='النهاية'||s==='١٧ ؟';
+    x.beginPath();x.arc(58,y,here?5:3.5,0,7);
+    x.fillStyle=sp?'#a13a2c':here?'#c9992e':'#8a857a';x.fill();
+    x.font=(here?'700 ':'500 ')+(sp?'13':'12')+'px Rubik';
+    x.fillStyle=sp?'#c96a55':here?'#e6d79c':'#9a958a';
+    x.fillText(s,182,y);
+  });
+  x.font='500 10px Rubik';x.fillStyle='#5c574c';x.textAlign='center';
+  x.fillText('اتجاه القطر',58,16);
+  $('mapNote').textContent=G.mapState===0?'الخط الأول — المرج ⇄ حلوان':G.mapState===1?'…في محطة مش كانت موجودة':'«محطة ١٧»؟';
+}
+function setTab(t){
+  phoneTab=t;
+  document.querySelectorAll('.ph-tabs button').forEach(b=>b.classList.toggle('on',b.dataset.t===t));
+  ['torch','map','msgs','notes'].forEach(s=>$('scr'+s[0].toUpperCase()+s.slice(1)).classList.add('hidden'));
+  $('scr'+t[0].toUpperCase()+t.slice(1)).classList.remove('hidden');
+  if(t==='map'&&G.mapState>=1)observe('map');
+}
+function openPhone(){G.phoneOpen=true;$('phone').classList.add('open');$('phoneGlow').style.opacity=.05;document.exitPointerLock&&document.exitPointerLock();}
+function closePhone(relock=true){
+  G.phoneOpen=false;$('phone').classList.remove('open');$('phoneGlow').style.opacity=0;
+  if(relock){tryLock();setTimeout(()=>{if(document.pointerLockElement!==document.body&&G.started&&!G.phoneOpen&&!G.choosing&&G.phase!=='end')show('clickCatch');},400);}
+}
+function setTorch(on){
+  if(on&&G.battery<=0){toast('البطارية خلصت.');on=false;}
+  G.torch=on;torchLight.visible=on;$('torchBtn').classList.toggle('on',on);
+  S.tone(on?1400:900,{g:.04,dur:.05});
+}
+
+/* ============================================================
+   الإدخال
+============================================================ */
+const keys={};
+function tryLock(){document.body.requestPointerLock&&document.body.requestPointerLock();}
+addEventListener('mousemove',e=>{
+  if(document.pointerLockElement!==document.body||G.inDialog)return;
+  player.yaw-=e.movementX*.0021;
+  player.pitch=clamp(player.pitch-e.movementY*.0021,-1.35,1.35);
+});
+function answerCall(){
+  if(!G.calling||G.callAnswered)return;
+  G.callAnswered=true;hide('callUI');S.ring(false);
+  S.tone(940,{g:.04,dur:.09});callScene();
+}
+addEventListener('keydown',e=>{
+  keys[e.code]=true;
+  if(e.code==='Space'&&G.started)e.preventDefault();
+  if(e.repeat)return;
+  if(e.code==='KeyM'&&G.started&&G.phase!=='end'&&!G.dying&&!G.inDialog&&!G.choosing){G.phoneOpen?closePhone():openPhone();}
+  if(e.code==='KeyT'&&G.started&&!G.choosing)setTorch(!G.torch);
+  if(e.code==='KeyR')answerCall();
+  if(e.code==='KeyE'&&!G.inDialog&&!G.phoneOpen&&!G.choosing&&hoverTarget&&hoverTarget.userData.onUse)hoverTarget.userData.onUse();
+});
+addEventListener('keyup',e=>keys[e.code]=false);
+document.addEventListener('pointerlockchange',()=>{
+  const locked=document.pointerLockElement===document.body;
+  if(!locked&&G.started&&!G.phoneOpen&&!G.choosing&&G.phase!=='end'){
+    $('clickCatch').textContent='اضغطي للرجوع للعبة';show('clickCatch');
+  }else if(locked)hide('clickCatch');
+});
+ $('clickCatch').onclick=()=>{
+  S.ctx&&S.ctx.resume&&S.ctx.resume();
+  hide('clickCatch');tryLock();
+  if(!G.started){G.started=true;fadeTo(0,1800);story();}
+};
+ $('callUI').onclick=answerCall;
+document.querySelectorAll('.ph-tabs button').forEach(b=>b.onclick=()=>setTab(b.dataset.t));
+ $('phoneX').onclick=()=>closePhone();
+ $('torchBtn').onclick=()=>setTorch(!G.torch);
+ $('againBtn').onclick=()=>location.reload();
+
+/* ============================================================
+   اللاعبة
+============================================================ */
+const player={pos:new THREE.Vector3(4.4,0,10),yaw:Math.PI,pitch:0,moving:0,bob:0,stepT:.5};
+const torchLight=new THREE.SpotLight(0xffe6b8,26,18,.48,.45,2);
+torchLight.position.set(.22,-.18,.05);
+const torchTarget=new THREE.Object3D();torchTarget.position.set(0,-.25,-4);
+torchLight.target=torchTarget;torchLight.visible=false;
+camera.add(torchLight,torchTarget);
+
+function insideTrain(){return Math.abs(player.pos.x)<1.15&&player.pos.z>-11&&player.pos.z<11;}
+
+function updatePlayer(dt){
+  const p=player;
+  const locked=document.pointerLockElement===document.body;
+  let moving=0;
+  if(locked&&!G.inDialog&&!G.phoneOpen&&!G.choosing&&G.phase!=='dead'&&G.phase!=='end'){
+    const f=(keys.KeyW?1:0)-(keys.KeyS?1:0);
+    const r=(keys.KeyD?1:0)-(keys.KeyA?1:0);
+    if(f||r){
+      const run=keys.ShiftLeft||keys.ShiftRight;
+      const sp=run?4.6:2.6,n=(f&&r)?.7071:1;
+      const fx=-Math.sin(p.yaw),fz=-Math.cos(p.yaw),rx=Math.cos(p.yaw),rz=-Math.sin(p.yaw);
+      p.pos.x+=(fx*f+rx*r)*n*sp*dt;
+      p.pos.z+=(fz*f+rz*r)*n*sp*dt;
+      moving=sp;p.bob+=dt*(run?11:7.5);
+      p.stepT-=dt*(run?1.7:1);
+      if(p.stepT<=0){p.stepT=.52;S.step(run?.13:.08);}
+    }
+  }
+  p.moving=moving;
+  collide(p.pos,.28);
+  camera.position.set(p.pos.x,1.62+(moving?Math.sin(p.bob)*.03:0),p.pos.z);
+  camera.rotation.set(p.pitch,p.yaw,0);
+  if(G.phase==='choice'&&p.pos.x>1.6)G.wentOut=true;
+}
+
+/* التفاعل بالرؤية */
+const ray=new THREE.Raycaster();ray.far=2.8;
+let hoverTarget=null;
+function updateInteract(){
+  hoverTarget=null;
+  if(G.inDialog||G.phoneOpen||G.choosing||G.phase==='dead'||G.phase==='end'){hide('prompt');return;}
+  ray.setFromCamera({x:0,y:0},camera);
+  const hitsArr=ray.intersectObjects(INTERACT,true);
+  if(hitsArr.length){
+    let o=hitsArr[0].object;
+    while(o&&!o.userData.label)o=o.parent;
+    if(o&&o.userData.label&&(!o.userData.when||o.userData.when())){hoverTarget=o;}
+  }
+  if(hoverTarget){show('prompt');$('prompt').innerHTML=hoverTarget.userData.label+' — <kbd>E</kbd>';}
+  else hide('prompt');
+}
+
+/* الكيانات */
+let entShuffleT=0;
+function updateEntities(dt,t){
+  if(G.lightsOn&&G.phase!=='finale'){
+    for(const id in passengers){
+      const p=passengers[id];if(!p||!p.visible)continue;
+      const u=p.userData;
+      if(id==='strange')trackHead(u.head,.025);
+      else if(G.pulseStare)trackHead(u.head,.2);
+      else{
+        u.head.rotation.y=Math.sin(t*.35+u.phase)*.07;
+        u.head.rotation.x=(id==='child'?.35:Math.sin(t*.22+u.phase)*.03);
+      }
+      u.torso.scale.y=1+Math.sin(t*1.2+u.phase)*.008;
+    }
+  }
+  if(G.standing){
+    for(const g of G.standing){
+      trackHead(g.userData.head,G.stareMode?.14:.05);
+      const ty=Math.atan2(player.pos.x-g.position.x,player.pos.z-g.position.z);
+      let d=ty-g.rotation.y;d=Math.atan2(Math.sin(d),Math.cos(d));
+      g.rotation.y+=d*dt*.5;
+      g.userData.torso.scale.y=1+Math.sin(t*1.3+g.userData.phase)*.006;
+    }
+  }
+  if(G.phase==='hold'&&!G.dying&&entity.visible){
+    const dir=new THREE.Vector3().subVectors(entity.position,camera.position);dir.y=0;
+    const camDir=new THREE.Vector3();camera.getWorldDirection(camDir);
+    const observed=camDir.dot(dir.clone().normalize())>.25;
+    const sp=observed?.5:2.6;
+    entity.position.z+=sp*dt;
+    entity.position.x+=(0-entity.position.x)*dt;
+    trackHead(entity.userData.head,.09);
+    entShuffleT-=dt;
+    if(entShuffleT<=0){S.noise(S.brown,{f:160,g:.11,dur:.14,a:.006});entShuffleT=observed?1.25:.35;}
+    if(entity.position.z>13)G.holdDone=true;
+    if(!G.inDialog){
+      const moved=player.pos.distanceTo(G.holdPos)>.45;
+      const near=Math.abs(entity.position.z-player.pos.z)<2.4;
+      if(moved||(G.torch&&near))death();
+    }
+  }
+}
+
+/* المؤثرات */
+let heartT=0,clackT=.4,battT=0;
+function updateFX(dt){
+  if(G.torch){G.battery-=dt*1.05;if(G.battery<=0){G.battery=0;setTorch(false);toast('البطارية خلصت.');}}
+  battT-=dt;if(battT<=0){battT=.4;updateBattUI();}
+  if(G.moving||G.trainMoving){clackT-=dt;if(clackT<=0){S.clack();clackT=.25+Math.random()*.3;}}
+  const base=G.lightsOn?(G.flickerHeavy?.45+Math.random()*.25:.88+Math.random()*.12):0;
+  tubeMats.forEach((m,i)=>m.emissiveIntensity=1.6*base*(i<G.tubeKill?0:1));
+  cabinLights.forEach((l,i)=>l.intensity=2.2*base*(i<G.tubeKill?0:1));
+  if(G.endFlickMat)G.endFlickMat.emissiveIntensity=Math.random()<.08?.08:.8+Math.random()*.4;
+  if(entLight&&entity.visible)entLight.intensity=.6+Math.random()*.35;
+  if(G.heartRate>0){heartT-=dt;if(heartT<=0){S.heart();heartT=G.heartRate===2?.55:.82;}}
+  if(G.phase!=='title'&&G.phase!=='end'){G.timeAcc+=dt;if(G.timeAcc>40){G.timeAcc=0;if(G.timeMin<95)setTime(G.timeMin+1);}}
+  $('grain').style.backgroundPosition=((Math.random()*128)|0)+'px '+((Math.random()*128)|0)+'px';
+  $('crosshair').classList.toggle('hidden',!(G.started&&G.phase!=='end'&&!G.phoneOpen&&!G.inDialog&&!G.dying));
+}
+
+/* ============================================================
+   القصة
+============================================================ */
+async function doors(open){
+  S.hiss(.18,.5);
+  doorCol.enabled=!open;
+  await Promise.all([
+    tween(doorL.position,'z',open?-1.31:-.39,900),
+    tween(doorR.position,'z',open?1.31:.39,900)
+  ]);
+}
+async function scrollWorld(to,dur,ease){
+  G.moving=true;
+  await tween(worldG.position,'z',to,dur,ease);
+  G.moving=false;
+}
+async function emergencyBeat(){
+  if(G.emUsed||!G.canEmergency)return;
+  while(G.subBusy)await wait(200);
+  G.emUsed=true;observe('button');
+  S.hiss(.3,.8);S.brake(1.2);
+  G.flickerHeavy=true;G.pulseStare=true;
+  await wait(2600);
+  G.flickerHeavy=false;G.pulseStare=false;
+  await sub('ليان','لفّوا كلهم في نفس اللحظة… في نفس النظرة.',3200);
+}
+async function endEvents(){
+  await wait(7000);if(G.phase!=='choice')return;
+  S.whisper(5);
+  await wait(6000);if(G.phase!=='choice')return;
+  const ghost=person({skin:0x8e897d,shirt:0x2e2e33,seated:false});
+  ghost.position.set(4.5,0,-584);ghost.rotation.y=Math.PI;worldG.add(ghost);
+  G.heartRate=1;S.whisper(6);
+  await wait(2600);
+  ghost.visible=false;G.heartRate=0;
+  toast('لازم ترجعي القطر. دلوقتي.');
+}
+
+async function story(){
+  addMsg('ماما','وصلتي؟ كلّميني أول ما تخرجي من المحطة.');
+  G.phase='platform';
+  objective('دوّري على عامل النظافة عند البوابة');
+  await until(()=>G.talked);
+  const tint=setInterval(()=>{if(G.timeMin<52)setTime(G.timeMin+1);},2400);
+  await wait(5200);clearInterval(tint);
+  tween(cleaner.position,'z',33,4200);tween(cleaner.position,'x',6.2,4200);
+  await wait(4200);cleaner.visible=false;
+  setTime(53);
+  S.setTrain(1);G.trainMoving=true;
+  S.tone(300,{type:'square',g:.05,dur:.9});S.tone(377,{type:'square',g:.05,dur:.9,delay:.05});
+  await tween(trainG.position,'z',0,7600,t=>1-Math.pow(1-t,3));
+  G.trainMoving=false;S.brake(2.2);await wait(300);
+  activeSets.add('train');
+  S.hiss(.25,.8);S.setTrain(.12);
+  await doors(true);S.ding();
+  G.phase='boarding';
+  objective('اركبي القطر');
+  boardHit.userData.label='اركبي القطر';
+  boardHit.userData.onUse=()=>{player.pos.x=Math.min(player.pos.x-.5,.4);};
+  await until(()=>insideTrain());
+  boardHit.userData.label=null;boardHit.userData.onUse=null;
+  G.boarded=true;
+  await wait(600);
+  await doors(false);S.ding();
+  G.phase='ride';G.canEmergency=true;
+  S.setTrain(1);
+  announce('الشهداء');
+  await scrollWorld(150,9000,smooth);
+  await scrollWorld(196,6500,t=>t);
+  toast('محطة الشهداء — عدّينا من غير ما نقف.');
+  announce('السادات');
+  await scrollWorld(320,9000,smooth);
+  await scrollWorld(366,6500,t=>t);
+  toast('السادات… برضه طبيعي.');
+  G.paperFlipped=true;newsMesh.rotation.z=Math.PI;
+  G.canEmergency=false;
+  S.setTrain(.32);S.setDrone(.07);G.flickerHeavy=true;
+  $('phSig').textContent='شبكة ▮';
+  setLED('المحطة القادمة: ــــ');nextStationHUD('ـــ');
+  await wait(1500);
+  toast('…؟');
+  await scrollWorld(540,12000,t=>t*t);
+  S.brake(2.8);
+  await scrollWorld(560,3400,t=>t);
+  S.setTrain(0);S.dingDong();
+  setLED('محطة: النهاية');nextStationHUD('النهاية');
+  G.mapState=1;drawMap();
+  await wait(900);
+  await doors(true);
+  G.phase='choice';
+  objective('تنزلي… ولا تفضلي؟');
+  if(G.phoneOpen)closePhone(false);
+  const c=await choose([{t:'انزلي. لازم أعرف المكان ده.'},{t:'فضّلي في القطر.'}]);
+  if(c===0){
+    G.exited=true;activeSets.add('end');
+    objective('اكتشفي محطة «النهاية» — وارجعي للقطر');
+    endEvents();
+    await until(()=>G.wentOut&&insideTrain());
+  }else{
+    await wait(13000);
+  }
+  await doors(false);S.ding();
+  activeSets.delete('end');
+  G.phase='ride2';G.flickerHeavy=false;S.setDrone(.04);
+  passengers.girl.visible=false;hits.girl.userData.label=null;
+  await wait(900);observe('gone');
+  await sub('ليان','كانوا ستة… دلوقتي خمسة. البنت اللي كانت بتبص للباب… رحت فين؟',3600);
+  S.setTrain(.5);
+  await scrollWorld(596,6000,smooth);
+  S.brake(3.4);
+  await scrollWorld(604,2400,t=>t);
+  S.setTrain(0);S.setAmb(0);S.setHum(0);
+  G.lightsOn=0;scene.fog.density=.085;
+  $('phSig').textContent='بلا شبكة';
+  passengers.old.visible=false;hits.old.userData.label=null;
+  dropNewspaper();
+  setTime(66);
+  await wait(1600);
+  await sub('ليان','…في حد كان قاعد هنا. الجريدة لسه مكانها.',3000);
+  for(let i=0;i<5;i++){S.clank(i%2?-.75:.75);await wait(820-i*70);}
+  entity.visible=true;entity.position.set(0,0,-11);
+  G.phase='hold';G.holdPos.copy(player.pos);
+  objective('متتحركيش. واطفي الكشاف.');
+  if(G.torch)setTorch(false);
+  S.whisper(4);
+  await until(()=>G.holdDone);
+  G.phase='afterPass';entity.visible=false;G.heartRate=0;
+  await wait(1400);
+  G.lightsOn=1;S.setAmb(.06);S.setHum(.015);scene.fog.density=.055;
+  await sub('ليان','عدّى جنبيا… من غير ما يبص. من غير ما يتنفس.',3200);
+  setTime(70);
+  await wait(2600);
+  S.ring(true);show('callUI');G.calling=true;
+  objective('ردي على المكالمة — R');
+  await until(()=>G.callAnswered);
+  objective(null);
+}
+
+async function callScene(){
+  await wait(800);
+  await dlg([
+    {w:'صوت بنت صغيرة',t:'…ليان؟'},
+    {w:'ليان',t:'مين معايا؟ مين دي؟'},
+    {w:'صوت بنت صغيرة',t:'…أنا إنتِ.'}
+  ]);
+  S.tone(480,{g:.05,dur:.35});await wait(500);
+  addMsg('رقم مجهول','متطلعيش من المترو لما توصلي محطة ١٧.');
+  G.mapState=2;drawMap();
+  if(G.battery>16){G.battery=16;updateBattUI();toast('البطارية بتخلص بسرعة غريبة…');}
+  await sub('ليان','مفيش محطة ١٧ على الخريطة. أنا عارفة الخريطة كويس.',3200);
+  finale();
+}
+
+function standThemUp(){
+  for(const id of['mother','child','young','worker','strange']){
+    if(passengers[id])passengers[id].visible=false;
+    if(hits[id])hits[id].userData.label=null;
+  }
+  G.standing=[];
+  const defs=[
+    ['mother',-1.02,6,0x8f6e52,0x5c4a56],
+    ['child',-1.02,5.3,0x9a7c60,0x7a6a52],
+    ['young',-1.02,2,0x9c7a5e,0x37404d],
+    ['worker',-1.02,-7,0x8f6e52,0x53513a],
+    ['strange',1.02,-10.5,0xb6b0a2,0x3f4045]
+  ];
+  for(const[id,x,z,skin,shirt]of defs){
+    const g=person({skin,shirt,seated:false,scale:id==='child'?.62:1});
+    g.position.set(x,0,z);trainG.add(g);
+    g.rotation.y=Math.atan2(player.pos.x-x,player.pos.z-z);
+    G.standing.push(g);
+  }
+}
+function stepForward(){
+  for(const g of G.standing){
+    const dx=player.pos.x-g.position.x,dz=player.pos.z-g.position.z,l=Math.hypot(dx,dz)||1;
+    g.position.x+=dx/l*.35;g.position.z+=dz/l*.35;
+    g.rotation.y=Math.atan2(dx,dz);
+  }
+}
+async function finale(){
+  G.phase='finale';setTime(74);
+  standThemUp();
+  S.dingDong();
+  objective('الصوت جه من آخر العربية — روحي له');
+  await until(()=>player.pos.z<-4);
+  stepForward();S.thud();G.heartRate=2;
+  await wait(1000);
+  await dlg([{w:'الركاب — بصوت واحد',t:'إنتِ سمعتيها برضه؟'}]);
+  G.stareMode=true;S.setDrone(.1);
+  await wait(1800);
+  for(let i=1;i<=4;i++){G.tubeKill=i;S.clank((i-2)*.4);await wait(650);}
+  G.lightsOn=0;S.setDrone(.18);
+  await wait(2000);
+  fadeTo(1,2800);
+  await wait(3000);
+  S.heart();await wait(850);S.heart();await wait(850);S.heart();
+  endScreen();
+}
+
+async function death(){
+  G.dying=true;G.phase='dead';G.deaths++;
+  const fx=-Math.sin(player.yaw),fz=-Math.cos(player.yaw);
+  entity.position.set(player.pos.x+fx*.75,0,player.pos.z+fz*.75);
+  entity.rotation.y=Math.atan2(-fx,-fz);
+  trackHead(entity.userData.head,1);
+  S.stinger();G.heartRate=2;
+  await wait(350);
+  fadeTo(1,420);
+  await wait(1300);
+  await sub('???','مش المفروض تتحركي.',2200);
+  player.pos.copy(G.holdPos);
+  entity.position.set(0,0,-11);
+  fadeTo(0,800);
+  await wait(600);
+  G.heartRate=0;G.phase='hold';G.dying=false;
+}
+
+function endScreen(){
+  G.phase='end';
+  S.killPersistent();S.ring(false);
+  document.exitPointerLock&&document.exitPointerLock();
+  const b=Math.max(0,Math.round(G.battery));
+  $('stats').innerHTML=
+    `<span class="k">ملاحظاتك</span><span class="v">${ar(G.observations.size)} / ٩</span>`+
+    `<span class="k">مرات الموت</span><span class="v">${ar(G.deaths)}</span>`+
+    `<span class="k">البطارية</span><span class="v">${ar(b)}٪</span>`+
+    `<span class="k">نزلتي «النهاية»؟</span><span class="v">${G.exited?'أيوه':'لأ'}</span>`+
+    `<span class="k">الساعة</span><span class="v">${$('clock').textContent}</span>`;
+  hide('hud');hide('objective');hide('prompt');hide('crosshair');hide('clickCatch');
+  show('end');
+}
+
+/* ============================================================
+   حلقة التشغيل
+============================================================ */
+let last=performance.now();
+function tick(now){
+  requestAnimationFrame(tick);
+  const dt=Math.min(.05,(now-last)/1000);last=now;
+  const t=now/1000;
+  if(G.started){updatePlayer(dt);updateInteract();}
+  updateEntities(dt,t);
+  updateFX(dt);
+  renderer.render(scene,camera);
+}
+requestAnimationFrame(tick);
+
+/* حبيبات الفيلم */
+(function(){
+  const c=document.createElement('canvas');c.width=c.height=128;
+  const x=c.getContext('2d'),d=x.createImageData(128,128);
+  for(let i=0;i<d.data.length;i+=4){const v=Math.random()*255;d.data[i]=d.data[i+1]=d.data[i+2]=v;d.data[i+3]=30;}
+  x.putImageData(d,0,0);
+  $('grain').style.backgroundImage=`url(${c.toDataURL()})`;
+})();
+
+/* المقدمة */
+let introDone=false;
+async function runIntro(){
+  const lines=['القاهرة — ١٢:٤٧ بعد نص الليل.','متأخرة تاني… الشغل أخد منك النهار كله، والمدينة بتتنام.','فاضل قطر واحد على الخط الأول.','آخر مترو.'];
+  const el=$('introText');
+  for(const ln of lines){
+    for(let i=0;i<=ln.length;i++){el.textContent=ln.slice(0,i);if(G.skipIntro)break;await wait(36);}
+    el.textContent=ln;await wait(850);if(G.skipIntro)break;
+  }
+  introDone=true;
+}
+ $('intro').addEventListener('click',()=>G.skipIntro=true);
+
+/* الإقلاع — بحماية من الأخطاء */
+let built=false,bootErr=null;
+(async()=>{
+  try{
+    await Promise.race([document.fonts.ready,wait(5000)]);
+    buildWorld();buildTrain();
+    const cv=document.createElement('canvas');cv.width=190;cv.height=310;
+    $('mapWrap').appendChild(cv);mapCtx=cv.getContext('2d');drawMap();
+    renderMsgs();renderNotes();updateBattUI();renderClock();
+    built=true;
+    $('startBtn').disabled=false;$('startBtn').textContent='ابدأي الرحلة';
+  }catch(err){
+    bootErr=err;console.error(err);
+    $('startBtn').disabled=false;
+    $('startBtn').textContent='حصل خطأ — جرّبي Chrome ونت شغّال';
+  }
+})();
+
+ $('startBtn').onclick=async()=>{
+  if(!built){
+    toast(bootErr?('خطأ: '+(bootErr.message||bootErr)):'لسه بتحمّل… ثانية');
+    return;
+  }
+  S.init();S.ctx.resume&&S.ctx.resume();
+  hide('title');show('intro');
+  await runIntro();
+  await until(()=>introDone);
+  hide('intro');
+  fadeTo(0,1500);
+  await wait(400);
+  S.setAmb(.05);S.setHum(.02);
+  show('hud');show('crosshair');
+  $('clickCatch').textContent='اضغطي عشان تنزلي المحطة';
+  show('clickCatch');
+};
+</script>
+
+<script>
+/* شبكة أمان: لو كود اللعبة ماتحمّلش (جوا تطبيق مستندات، أو من غير إنترنت)
+   الزرار يتحول لزرار إرشاد بعد ٦ ثواني بدل ما يفضل ميت */
+setTimeout(function(){
+  var b=document.getElementById('startBtn');
+  if(b&&b.disabled){
+    b.disabled=false;
+    b.textContent='الزرار مش شغّال؟ افتحي الملف في Chrome';
+    b.onclick=function(){
+      alert('اللعبة محتاجة متصفح حقيقي عشان تشتغل:\n\n١) افتحي Google Chrome أو Edge على الكمبيوتر\n٢) اسحبي ملف اللعبة (game.html) جوه صفحة المتصفح\n٣) لازم إنترنت شغّال أول مرة\n\nلو كنتي فاتحة الملف جوا تطبيق "مستندات" أو قارئ ملفات — التطبيق ده بيعرض الكود كورق بس، ومش بيشغّل اللعبة.');
+    };
+  }
+},6000);
+</script>
+</body>
+</html>
