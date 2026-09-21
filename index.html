@@ -982,10 +982,20 @@ const keys={};
 const joy={dx:0,dy:0};
 let joyTouch=null,lookTouch=null;
 function tryLock(){if(!isTouch)document.body.requestPointerLock&&document.body.requestPointerLock();}
+let dragLook=false;
+addEventListener('mousedown',e=>{
+  if(!isTouch&&e.button===0&&G.started&&!G.inDialog&&!G.choosing&&!G.phoneOpen&&!G.cine
+     &&document.pointerLockElement!==document.body&&!e.target.closest('button'))dragLook=true;});
+addEventListener('mouseup',()=>dragLook=false);
 addEventListener('mousemove',e=>{
-  if(isTouch||document.pointerLockElement!==document.body||G.inDialog)return;
-  player.yaw-=e.movementX*.0021;
-  player.pitch=clamp(player.pitch-e.movementY*.0021,-1.35,1.35);});
+  if(isTouch||G.inDialog)return;
+  if(document.pointerLockElement===document.body){
+    player.yaw-=e.movementX*.0021;
+    player.pitch=clamp(player.pitch-e.movementY*.0021,-1.35,1.35);
+  }else if(dragLook){
+    player.yaw-=e.movementX*.003;
+    player.pitch=clamp(player.pitch-e.movementY*.003,-1.35,1.35);
+  }});
 function tryInteract(){
   if(G.inDialog||G.phoneOpen||G.choosing||G.cine||G.phase==='dead'||G.phase==='end')return;
   if(hoverTarget&&hoverTarget.userData.onUse&&(!hoverTarget.userData.when||hoverTarget.userData.when()))
@@ -1044,8 +1054,8 @@ document.addEventListener('pointerlockchange',()=>{
   if(!locked&&G.started&&!G.phoneOpen&&!G.choosing&&G.phase!=='end'&&!G.cine){
     $('clickCatch').textContent='اضغطي للرجوع للعبة';show('clickCatch');
   }else if(locked)hide('clickCatch');});
- $('clickCatch').onclick=()=>{S.ctx&&S.ctx.resume&&S.ctx.resume();hide('clickCatch');
-  if(!G.started){G.started=true;fadeTo(0,1800);story();}else tryLock();};
+ $('clickCatch').onclick=()=>{S.ctx&&S.ctx.resume&&S.ctx.resume();hide('clickCatch');tryLock();
+  if(!G.started){G.started=true;fadeTo(0,1800);story();}};
 function answerCall(){
   if(!G.calling||G.callAnswered)return;
   G.callAnswered=true;hide('callUI');S.ring(false);
@@ -1069,9 +1079,9 @@ torchLight.target=torchTarget;torchLight.visible=false;
 camera.add(torchLight,torchTarget);
 function insideTrain(){return Math.abs(player.pos.x)<1.15&&player.pos.z>-11&&player.pos.z<11;}
 function updatePlayer(dt){
-  const p=player,locked=document.pointerLockElement===document.body;
+    const p=player;
   let moving=0;
-  if((isTouch||locked)&&!G.inDialog&&!G.phoneOpen&&!G.choosing&&!G.cine&&G.phase!=='dead'&&G.phase!=='end'){
+  if(!G.inDialog&&!G.phoneOpen&&!G.choosing&&!G.cine&&G.phase!=='dead'&&G.phase!=='end'){
     let f=0,r=0,run=false;
     if(isTouch){f=-joy.dy;r=joy.dx;run=Math.hypot(joy.dx,joy.dy)>.85;}
     else{f=(keys.KeyW?1:0)-(keys.KeyS?1:0);r=(keys.KeyD?1:0)-(keys.KeyA?1:0);run=keys.ShiftLeft||keys.ShiftRight;}
